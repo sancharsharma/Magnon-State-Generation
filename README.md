@@ -7,3 +7,5 @@ Wigner_Plots.py:
   
 Fidelity_Plots.py:
   For a given class of states, plot the fidelity as a function of some continuous or discrete parameter.
+
+One should be able to run these files by downloading all the files and keeping them in one folder. For reference, the fidelity data is already stored in DataStateGeneration.hdf5.
