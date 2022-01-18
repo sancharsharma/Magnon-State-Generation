@@ -55,7 +55,7 @@ System_pars = {
 	}
 
 #### What do we want to plot? Defined CatsEven, CatsOdd, Focks, FocksSup. See Classes_States.py for definitions or changes
-cls = Cls.FocksSup(Nm, nmax=5)  
+cls = Cls.FocksSup(Nm)  
 
 #### Data storage
 fidelities_opt = []
