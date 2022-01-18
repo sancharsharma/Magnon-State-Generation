@@ -9,7 +9,7 @@ import h5py
 
 import MagnonTransmon as MagTr
 import Simulation as Sim
-import GenerationSequence_Transmon as Gen
+import GenerationSequence as Gen
 import Classes_States as Cls
 from importlib import reload
 
@@ -21,7 +21,7 @@ reload(Cls)
 Nm = 19
 Nq = 6
 
-##### Definition of system parameters (TODO: references to add maybe)
+##### Definition of system parameters 
 
 #All values are in GHz or nanosecond
 #Hybrid quantum systems based on magnonics
@@ -54,8 +54,8 @@ System_pars = {
 	'TLS' : 0 # If defined and \ne 0, the sequence is generated assuming a two-level approximation
 	}
 
-#### What do we want to plot? Defined CatsEven, CatsOdd, Focks, FocksSup
-cls = Cls.FocksSup(Nm)  
+#### What do we want to plot? Defined CatsEven, CatsOdd, Focks, FocksSup. See Classes_States.py for definitions or changes
+cls = Cls.FocksSup(Nm, nmax=5)  
 
 #### Data storage
 fidelities_opt = []
@@ -91,9 +91,7 @@ for ii in range(cls.nmax):
 	fin_states = rot_Op*result.states[-1]*rot_Op.dag()
 	fin_magnon_state = (fin_states.ptrace(0)).unit()  # Trace out transmon
 
-	## Can also store bare fidelity here: qt.fidelity(fin_magnon_state,target) 
-	
-	# The resulting state can be an approximate rotated version of target as well
+	# The resulting state can be a rotated version of the target, which we correct for.
 	mag_rot = lambda theta: (-1j*theta*qt.num(Nm)).expm()
 	ang_corrs = minimize_scalar(lambda theta: -qt.fidelity( fin_magnon_state, mag_rot(theta)*target ) )
 	fid,ang = -ang_corrs['fun'],ang_corrs['x']
@@ -102,7 +100,6 @@ for ii in range(cls.nmax):
 
 	fidelities_opt.append([cls.pars[ii],fid])
 
-	print('original fidelity:', qt.fidelity(fin_magnon_state,target), ' corr angle:', ang, ' corr fidelity:', fid)  #TODO: Remove this statement before publishing the code
 	print('-----XXXX-----XXXX-----XXX-----')
 	print('')
 	print('we are done with count '+ str(ii+1) + '/' + str(cls.nmax))

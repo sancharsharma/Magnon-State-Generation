@@ -8,7 +8,7 @@ import scipy.optimize as scopt
 
 import MagnonTransmon as MagTr
 import Simulation as Sim
-import GenerationSequence_Transmon as Gen
+import GenerationSequence as Gen
 from importlib import reload
 import h5py
 
@@ -60,18 +60,17 @@ cat_even = lambda Cpos: (coh(Cpos/2) + coh(-Cpos/2)).unit()  # Function to creat
 cat_odd = lambda Cpos: (coh(Cpos/2) - coh(-Cpos/2)).unit()  # Function to create an odd cat state
 
 
-#### Target states in the form of [state, name]
+#### Target states in the form of [name, name]
 States = []
 States.append(["MediumEvenCat",cat_even(4)])
 States.append(["LargeEvenCat",cat_even(5)])
 States.append(["MediumOddCat",cat_odd(4)])
 States.append(["LargeOddCat",cat_odd(5)])
-States.append(["MediumFock",fock(6)])
-States.append(["LargeFock",fock(10)])
-States.append(["MediumSuperpos",fock_sup(6)])
-States.append(["LargeSuperpos",fock_sup(10)])
+#States.append(["MediumFock",fock(6)])
+#States.append(["LargeFock",fock(10)])
+#States.append(["MediumSuperpos",fock_sup(6)])
+#States.append(["LargeSuperpos",fock_sup(10)])
 
-#In what follows we will save only the results for the fidelities after correcting for possible rotation.
 #At the end, each entry of States will be of the form ['name',target,achieved,fidelity]
 no_targets = len(States)
 for i in range(no_targets):
@@ -104,7 +103,7 @@ for i in range(no_targets):
 	fin_states = rot_Op*result.states[-1]*rot_Op.dag()
 	fin_magnon_state = (fin_states.ptrace(0)).unit()  # Trace out transmon
 
-	# The resulting state can be a rotated version of 
+	# The resulting state can be a rotated version of the target, which we correct for.
 	mag_rot = lambda theta: (-1j*theta*qt.num(Nm)).expm()
 	ang_corrs = scopt.minimize_scalar(lambda theta: -qt.fidelity( fin_magnon_state, mag_rot(theta)*target ) )
 	fid,ang = -ang_corrs['fun'],ang_corrs['x']
@@ -113,8 +112,6 @@ for i in range(no_targets):
 
 	States[i].append(corrected_state)
 	States[i].append(fid)
-
-	print('original fidelity: ', qt.fidelity(fin_magnon_state,target), 'corr angle: ', ang, 'corr fidelity: ', fid)  #TODO: Remove this statement before publishing the code
 
 	del System
 
@@ -132,7 +129,7 @@ def plot_wigner2(rho, fig=None, ax=None):
 	vec = np.linspace(-alpha_max, alpha_max, 500)
 	W = qt.wigner(rho, vec, vec, method='iterative')
 	
-	# Our convention is different than qutip's convention W_{mag}(M_x/M_{ZPF},M_y/M_{ZPF}) = 2\pi W_Q(M_x/sqrt(2)*M_{ZPF},-M_y/sqrt(2)*M_{ZPF})
+	# Our convention W_{mag} is different than qutip's convention W_Q: W_{mag}(M_x,M_y) = 2\pi W_Q(M_x/sqrt(2),-M_y/sqrt(2))
 	
 	W_scaled = (2*np.pi)*W
 	xvec = np.sqrt(2)*vec
@@ -159,49 +156,50 @@ def plot_wigner2(rho, fig=None, ax=None):
 
 	return fig, ax
 
-##### Code to save every figure separately
-
-plt.rcParams.update({'font.size': 22})
-for i in range(no_targets):
-	name = States[i][0]
-	target = States[i][1]
-	achieved = States[i][2]
-
-	fig_tar, ax_tar = plot_wigner2(target) 
-	fig_tar.savefig('Figures/' + name + '_target.png',dpi = 400,bbox_inches = 'tight')
-
-	fig_res, ax_res = plot_wigner2(achieved)
-	fig_res.savefig('Figures/' + name + '_achieved.png',dpi = 400,bbox_inches = 'tight')
-
-	del fig_tar,ax_tar,fig_res,ax_res
-
-
-
-##### Code to plot everything in one figure
-#plt.rcParams.update({'font.size': 22})
-#figure = plt.figure(figsize=(18,8*no_targets))
+##### Code to save every figure separately in a file. It requires a folder named Figures in the directory of working.
 #
-#axes_target = ['None']*(no_targets)
-#axes_res = ['None']*(no_targets)
+#plt.rcParams.update({'font.size': 22})
 #
 #for i in range(no_targets):
 #	name = States[i][0]
 #	target = States[i][1]
 #	achieved = States[i][2]
-#	axes_target[i] = figure.add_subplot(no_targets,2,2*i+1)
-#	axes_res[i] = figure.add_subplot(no_targets,2,2*i+2)
-#	plot_wigner2(target, fig=figure, ax=axes_target[i])
-#	plot_wigner2(achieved, fig=figure, ax=axes_res[i])
 #
-#	axes_target[i].set_xlabel(r'$\frac{M_x}{{\cal M}_{\rm ZPF}}$',fontsize = 22)
-#	axes_target[i].set_ylabel(r'$\frac{M_y}{{\cal M}_{\rm ZPF}}$',fontsize = 22)
+#	fig_tar, ax_tar = plot_wigner2(target) 
+#	fig_tar.savefig('Figures/' + name + '_target.png',dpi = 400,bbox_inches = 'tight')
 #
-#	axes_res[i].set_xlabel(r'$\frac{M_x}{{\cal M}_{\rm ZPF}}$',fontsize = 22)
-#	axes_res[i].set_ylabel(r'$\frac{M_y}{{\cal M}_{\rm ZPF}}$',fontsize = 22)
+#	fig_res, ax_res = plot_wigner2(achieved)
+#	fig_res.savefig('Figures/' + name + '_achieved.png',dpi = 400,bbox_inches = 'tight')
 #
-#
-#axes_target[0].set_title('States',fontsize=24)
-#axes_res[0].set_title('Results',fontsize=24)
+#	del fig_tar,ax_tar,fig_res,ax_res
+
+
+
+##### Code to plot everything in one figure
+plt.rcParams.update({'font.size': 22})
+figure = plt.figure(figsize=(18,8*no_targets))
+
+axes_target = ['None']*(no_targets)
+axes_res = ['None']*(no_targets)
+
+for i in range(no_targets):
+	name = States[i][0]
+	target = States[i][1]
+	achieved = States[i][2]
+	axes_target[i] = figure.add_subplot(no_targets,2,2*i+1)
+	axes_res[i] = figure.add_subplot(no_targets,2,2*i+2)
+	plot_wigner2(target, fig=figure, ax=axes_target[i])
+	plot_wigner2(achieved, fig=figure, ax=axes_res[i])
+
+	axes_target[i].set_xlabel(r'$\frac{M_x}{{\cal M}_{\rm ZPF}}$',fontsize = 22)
+	axes_target[i].set_ylabel(r'$\frac{M_y}{{\cal M}_{\rm ZPF}}$',fontsize = 22)
+
+	axes_res[i].set_xlabel(r'$\frac{M_x}{{\cal M}_{\rm ZPF}}$',fontsize = 22)
+	axes_res[i].set_ylabel(r'$\frac{M_y}{{\cal M}_{\rm ZPF}}$',fontsize = 22)
+
+
+axes_target[0].set_title('States',fontsize=24)
+axes_res[0].set_title('Results',fontsize=24)
 
 
 
