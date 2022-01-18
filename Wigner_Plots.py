@@ -79,11 +79,13 @@ for i in range(no_targets):
 
 	System = MagTr.MagTr(System_pars)
 
+	# Seq is the sequence of operations to be performed. Psi_expect_target stores the expected states after each operation ignoring dissipation.
 	Seq,Psi_expect_target = Gen.Sequence(target,System_pars)
 	if Seq == []:
 		States[i].append(qt.fock(Nm,0))
 		continue
 		
+	# coup_pulse is Delta(t), gate_pulse is eps(t) in rotated frame, Prot_time is the total protocol time.
 	coup_pulse,gate_pulse,Prot_time = Gen.Pulses(Seq,System_pars)
 
 	System.freq_mod(coup_pulse)
@@ -203,5 +205,6 @@ axes_res[0].set_title('Results',fontsize=24)
 
 
 
+print('Program finished.')
 
 

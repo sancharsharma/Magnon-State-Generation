@@ -60,7 +60,7 @@ cls = Cls.FocksSup(Nm)
 #### Data storage
 fidelities_opt = []
 
-#In what follows we will save only the results for the optimized fidelities.
+#### fidelities_opt will be an array with each entry as [par,fid] (see Classes_States.py for definition of pars for each class)
 for ii in range(cls.nmax):
 	
 	target = cls.states[ii]
@@ -121,4 +121,4 @@ h5file.create_dataset(cls.data_label, data=fidelities_opt)
 
 h5file.close()
 
-print('Data stored.')
+print('Data stored. Program finished.')
