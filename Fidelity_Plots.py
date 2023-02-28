@@ -24,9 +24,7 @@ Nq = 6
 ##### Definition of system parameters 
 
 #All values are in GHz or nanosecond
-#Hybrid quantum systems based on magnonics
 #Notice that we have a lot of dissipation!
-#Value for A and for the qubit-magnon coupling correspond to optimistic values
 
 omega_m = 2*np.pi*6  # Magnon frequency
 omega_q = 2*np.pi*5  # Frequency of 0-1 transition in transmon
